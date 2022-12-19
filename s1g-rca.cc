@@ -1204,7 +1204,7 @@ int main(int argc, char *argv[]) {
 	configureTIM ();
 	checkRawAndTimConfiguration ();
 
-	config.NSSFile = config.trafficType + "_" + std::to_string(config.Nsta)
+	config.NSSFile = config.AllFilePathPrefix + config.trafficType + "_" + std::to_string(config.Nsta)
 			+ "sta_" + std::to_string(config.NGroup) + "Group_"
 			+ std::to_string(config.NRawSlotNum) + "slots_"
 			+ std::to_string(config.payloadSize) + "payload_"
@@ -1447,45 +1447,50 @@ int main(int argc, char *argv[]) {
 				<< stats.get(i).GetPacketLoss(config.trafficType) << endl;
 	}
 
+	// Throughput & Packet Loss
+	// initialise all parameters
+	double throughput = 0;
+	uint32_t totalPacketsThrough = 0;
+	double ulThroughput = 0;
+	double dlThroughput = 0;
+	double packetLossPerc = 0;
+	// udp
 	if (config.trafficType == "udp")
 	{
-		double throughput = 0;
-		uint32_t totalPacketsThrough =
-				DynamicCast<UdpServer>(serverApp.Get(0))->GetReceived();
-		throughput = totalPacketsThrough * config.payloadSize * 8
-				/ (config.simulationTime * 1000000.0);
-		cout << "totalPacketsThrough " << totalPacketsThrough << " ++my "
-				<< totalSuccessfulPackets << endl;
-		cout << "throughput " << throughput << " ++my "
-				<< pay * 8. / (config.simulationTime * 1000000.0) << endl;
-		std::cout << "datarate" << "\t" << "throughput" << std::endl;
-		std::cout << config.datarate << "\t" << throughput << " Mbit/s"
-				<< std::endl;
-
+		
+		totalPacketsThrough = DynamicCast<UdpServer>(serverApp.Get(0))->GetReceived();
+		throughput = totalPacketsThrough * config.payloadSize * 8 / (config.simulationTime * 1000000.0);
+		// calculate the packet loss
+		packetLossPerc = 100 - 100. * totalPacketsThrough / totalSentPackets;
+		// output
+		cout << "totalPacketsThrough " << totalPacketsThrough << " ++my " << totalSuccessfulPackets << endl;
+		cout << "throughput " << throughput << " ++my "	<< pay * 8. / (config.simulationTime * 1000000.0) << endl;
 	}
+	// udpecho
 	else if (config.trafficType == "udpecho")
 	{
-		double ulThroughput = 0, dlThroughput = 0;
 		ulThroughput = totalSuccessfulPackets * config.payloadSize * 8 / (config.simulationTime * 1000000.0);
 		dlThroughput = totalPacketsEchoed * config.payloadSize * 8 / (config.simulationTime * 1000000.0);
+		throughput = (totalSuccessfulPackets + totalPacketsEchoed) * config.payloadSize * 8 / (config.simulationTime * 1000000.0);
+		// calculate the packet loss
+		packetLossPerc = 100 - 100. * totalPacketsEchoed / totalSentPackets;
+		// output
 		cout << "totalPacketsSent " << totalSentPackets << endl;
 		cout << "totalPacketsDelivered " << totalSuccessfulPackets << endl;
 		cout << "totalPacketsEchoed " << totalPacketsEchoed << endl;
 		cout << "UL packets lost " << totalSentPackets - totalSuccessfulPackets << endl;
 		cout << "DL packets lost " << totalSuccessfulPackets - totalPacketsEchoed << endl;
 		cout << "Total packets lost " << totalSentPackets - totalPacketsEchoed << endl;
-
-		/*cout << "uplink throughput Mbit/s " << ulThroughput << endl;
-		cout << "downlink throughput Mbit/s " << dlThroughput << endl;*/
-
-		double throughput = (totalSuccessfulPackets + totalPacketsEchoed) * config.payloadSize * 8 / (config.simulationTime * 1000000.0);
-		cout << "total throughput Kbit/s " << throughput * 1000 << endl;
-
-		std::cout << "datarate" << "\t" << "throughput" << std::endl;
-		std::cout << config.datarate << "\t" << throughput * 1000 << " Kbit/s" << std::endl;
+		cout << "total throughput Kbit/s " << throughput * 1000 << endl;	
 	}
-	cout << "total packet loss % "
-			<< 100 - 100. * totalPacketsEchoed / totalSentPackets << endl;
+	// output
+	// date rate & throughput
+	cout << "datarate" << "\t" << "throughput" << std::endl;
+	cout << config.datarate << "\t";
+	config.trafficType == "udp" ? std::cout << throughput << " Mbit/s": std::cout << throughput * 1000 << " Kbit/s";
+	cout << endl;
+	// packet loss
+	cout << "total packet loss % "<< packetLossPerc << endl;
 	Simulator::Destroy();
 
     ofstream risultati;
@@ -1511,6 +1516,20 @@ int main(int argc, char *argv[]) {
         i++;
     }
     
+	// output the date
+	// format:  | rho(m) | simulation time(sec) | throughput(Mbps) |
+	std::ofstream outfileDisDateRate;
+	string outputFilePath = config.AllFilePathPrefix + config.DataMode + ".csv";
+	outfileDisDateRate.open(outputFilePath, std::ios_base::app);
+	outfileDisDateRate << config.rho;
+	outfileDisDateRate << "\t";
+	outfileDisDateRate << config.simulationTime;
+	outfileDisDateRate << "\t";
+	outfileDisDateRate << throughput;
+	outfileDisDateRate << "\n";
+	outfileDisDateRate.close();
+
+
     risultati.close();
 	return 0;
 }

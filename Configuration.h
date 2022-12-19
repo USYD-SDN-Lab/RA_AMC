@@ -74,6 +74,7 @@ struct Configuration {
 
 	string name = "test"; // empty string if no visualization TODO
 	string APPcapFile = "appcap"; // empty string if no visualization TODO
+	string AllFilePathPrefix = "./__dist__/";
 	string NSSFile = "test.nss";
 
 	/*
