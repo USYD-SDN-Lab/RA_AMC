@@ -1199,7 +1199,7 @@ int main(int argc, char *argv[]) {
 
 	// set folders & files to store data
 	// create the prefix folder for all files
-	if (!access(config.AllFilePathPrefix.c_str(), F_OK)){
+	if (access(config.AllFilePathPrefix.c_str(), F_OK) == -1){
 		mkdir(config.AllFilePathPrefix.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	}
 
