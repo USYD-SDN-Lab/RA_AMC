@@ -13,8 +13,8 @@
 #include <stdlib.h>
 #include <ctime>
 #include <fstream>                          // output data into a file
-#include <io.h>                             // check wether a file exists or not using `_access` 
-#include <direct.h>                         // create a folder using `_mkdir`
+#include <unistd.h>                         // check whether a folder or a file exists using `access`
+#include <sys/types.h>                      // create a folder using `mkdir`
 #include <sys/stat.h>
 #include "ns3/rps.h"
 #include <utility>

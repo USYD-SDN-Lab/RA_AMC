@@ -1199,8 +1199,8 @@ int main(int argc, char *argv[]) {
 
 	// set folders & files to store data
 	// create the prefix folder for all files
-	if (_access(config.AllFilePathPrefix.c_str(), 0) == -1){
-		_mkdir(config.AllFilePathPrefix.c_str());
+	if (!access(config.AllFilePathPrefix.c_str(), F_OK)){
+		mkdir(config.AllFilePathPrefix.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	}
 
 	config.rps = configureRAW(config.rps, config.RAWConfigFile);
