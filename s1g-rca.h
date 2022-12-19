@@ -12,7 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctime>
-#include <fstream>
+#include <fstream>                          // output data into a file
+#include <io.h>                             // check wether a file exists or not using `_access` 
+#include <direct.h>                         // create a folder using `_mkdir`
 #include <sys/stat.h>
 #include "ns3/rps.h"
 #include <utility>

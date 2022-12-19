@@ -1197,6 +1197,12 @@ int main(int argc, char *argv[]) {
 	bool OutputPosition = true;
 	config = Configuration(argc, argv);
 
+	// set folders & files to store data
+	// create the prefix folder for all files
+	if (_access(config.AllFilePathPrefix.c_str(), 0) == -1){
+		_mkdir(config.AllFilePathPrefix.c_str());
+	}
+
 	config.rps = configureRAW(config.rps, config.RAWConfigFile);
 	config.Nsta = config.NRawSta;
 
